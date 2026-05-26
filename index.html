@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>果算 — 每日記帳</title>
+<meta name="theme-color" content="#2a0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="果算">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Serif TC','Microsoft JhengHei',serif;background:linear-gradient(160deg,#2a0000 0%,#6b0000 55%,#2a0000 100%);min-height:100vh;color:#fff;-webkit-tap-highlight-color:transparent;}
+#hdr{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#1a0000,rgba(26,0,0,.96));padding:14px 16px 12px;border-bottom:1px solid rgba(255,215,0,.28);box-shadow:0 4px 24px rgba(0,0,0,.5);}
+#hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+#app-title{color:#ffd700;font-size:1.05em;font-weight:900;letter-spacing:3px;}
+#today-date{color:rgba(255,215,0,.55);font-size:.78em;letter-spacing:1px;}
+#total-wrap{text-align:center;}
+#total-lbl{color:rgba(255,220,120,.65);font-size:.75em;letter-spacing:3px;margin-bottom:2px;}
+#total-amt{color:#ffd700;font-size:2.7em;font-weight:900;letter-spacing:1px;text-shadow:0 0 24px rgba(255,215,0,.45);line-height:1.1;}
+#total-nt{font-size:.58em;opacity:.85;vertical-align:baseline;}
+#cust-row{text-align:center;color:rgba(255,220,180,.6);font-size:.76em;margin-top:5px;letter-spacing:1px;}
+#last-toast{text-align:center;font-size:.78em;color:rgba(105,240,174,.8);letter-spacing:1px;margin-top:5px;min-height:18px;transition:opacity .3s;}
+#main{padding:14px 14px 110px;display:flex;flex-direction:column;gap:11px;max-width:430px;margin:0 auto;}
+.pcard{border-radius:18px;border:2px solid transparent;cursor:pointer;transition:transform .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent;user-select:none;overflow:hidden;}
+.pcard:active{transform:scale(.94);}
+@keyframes tap-pop{0%{transform:scale(.94)}55%{transform:scale(1.05)}100%{transform:scale(1)}}
+.pcard.popped{animation:tap-pop .32s ease forwards;}
+.pcard-inner{display:flex;align-items:center;gap:14px;padding:17px 16px;}
+.pc-emoji{font-size:2.4em;line-height:1;flex-shrink:0;}
+.pc-info{flex:1;}
+.pc-name{font-size:1.0em;font-weight:700;color:#fff;letter-spacing:1px;margin-bottom:3px;}
+.pc-note{font-size:.72em;color:rgba(255,255,255,.5);letter-spacing:.5px;}
+.pc-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.pc-price{font-size:1.08em;font-weight:900;color:#ffd700;letter-spacing:1px;}
+.pc-badge{min-width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3em;font-weight:900;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.35);}
+#bot{position:fixed;bottom:0;left:0;right:0;z-index:100;background:linear-gradient(180deg,rgba(26,0,0,0) 0%,rgba(10,0,0,.97) 22%,#050000 100%);padding:10px 14px 28px;display:flex;gap:10px;max-width:430px;margin:0 auto;}
+.btn-sec{flex:1;padding:15px 0;border-radius:14px;border:1.5px solid rgba(255,215,0,.32);background:rgba(0,0,0,.4);color:rgba(255,215,0,.75);font-size:.88em;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:1px;}
+.btn-sec:active{transform:scale(.95);}
+.btn-main{flex:2;padding:15px 0;border-radius:14px;border:2px solid #ffd700;background:linear-gradient(180deg,#3a1a00,#1a0000);color:#ffd700;font-size:1.0em;font-weight:900;font-family:inherit;cursor:pointer;letter-spacing:2px;}
+.btn-main:active{transform:scale(.95);}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+#overlay.open{display:flex;}
+#modal{background:linear-gradient(180deg,#250000,#120000);border:2px solid rgba(255,215,0,.45);border-radius:24px 24px 0 0;padding:22px 18px 40px;width:100%;max-width:430px;animation:up .3s ease;}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+#m-title{color:#ffd700;font-size:1.05em;font-weight:900;letter-spacing:3px;text-align:center;margin-bottom:4px;}
+#m-date{color:rgba(255,215,0,.5);font-size:.78em;text-align:center;margin-bottom:14px;letter-spacing:1px;}
+.m-row{display:flex;align-items:center;gap:12px;padding:10px 0;}
+.m-emoji{font-size:1.4em;flex-shrink:0;}
+.m-name{flex:1;font-size:.88em;color:#fff9c4;font-weight:700;letter-spacing:.5px;}
+.m-detail{text-align:right;}
+.m-cnt{font-size:.75em;color:rgba(255,255,255,.5);}
+.m-sub{font-size:1.0em;color:#ffd700;font-weight:900;}
+.m-div{height:1px;background:rgba(255,215,0,.22);margin:6px 0;}
+#m-total{display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;}
+#m-total-lbl{color:rgba(255,220,180,.75);font-size:.9em;letter-spacing:2px;}
+#m-total-val{color:#ffd700;font-size:1.5em;font-weight:900;}
+#m-stats{display:flex;gap:10px;margin-top:12px;}
+.m-stat{flex:1;background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.18);border-radius:12px;padding:10px 6px;text-align:center;}
+.m-sv{font-size:1.15em;font-weight:900;color:#ffd700;}
+.m-sl{font-size:.67em;color:rgba(255,220,180,.55);margin-top:2px;letter-spacing:1px;}
+#m-btns{display:flex;gap:10px;margin-top:18px;}
+.m-copy{flex:2;padding:15px 0;border-radius:14px;border:2px solid #ffd700;background:linear-gradient(180deg,#3a1a00,#1a0000);color:#ffd700;font-size:1.0em;font-weight:900;font-family:inherit;cursor:pointer;letter-spacing:2px;}
+.m-copy:active{transform:scale(.96);}
+.m-copy.done{background:linear-gradient(180deg,#a5d6a7,#388e3c);color:#fff;border-color:#69f0ae;}
+.m-close{flex:1;padding:15px 0;border-radius:14px;border:1.5px solid rgba(255,255,255,.18);background:rgba(0,0,0,.3);color:rgba(255,255,255,.65);font-size:.88em;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:1px;}
+.m-close:active{transform:scale(.96);}
+</style>
+</head>
+<body>
+<div id="hdr">
+  <div id="hdr-top">
+    <div id="app-title">🧮 果算</div>
+    <div id="today-date"></div>
+  </div>
+  <div id="total-wrap">
+    <div id="total-lbl">今日總收入</div>
+    <div id="total-amt"><span id="total-nt">NT$</span><span id="total-num">0</span></div>
+  </div>
+  <div id="cust-row">已服務 <span id="cust-num">0</span> 位香客</div>
+  <div id="last-toast">　</div>
+</div>
+<div id="main"></div>
+<div id="bot">
+  <button class="btn-sec" onclick="undoLast()">↩ 撤銷</button>
+  <button class="btn-main" onclick="showModal()">📊 收攤結算</button>
+  <button class="btn-sec" onclick="doReset()">🔄 重置</button>
+</div>
+<div id="overlay" onclick="overlayTap(event)">
+  <div id="modal">
+    <div id="m-title">📊 今日收攤報表</div>
+    <div id="m-date"></div>
+    <div id="m-rows"></div>
+    <div class="m-div"></div>
+    <div id="m-total">
+      <div id="m-total-lbl">今日總營收</div>
+      <div id="m-total-val"></div>
+    </div>
+    <div id="m-stats">
+      <div class="m-stat"><div class="m-sv" id="s-cust">0</div><div class="m-sl">香客數</div></div>
+      <div class="m-stat"><div class="m-sv" id="s-avg">NT$0</div><div class="m-sl">平均客單</div></div>
+      <div class="m-stat"><div class="m-sv" id="s-best">—</div><div class="m-sl">最熱銷</div></div>
+    </div>
+    <div id="m-btns">
+      <button class="m-copy" id="copy-btn" onclick="copyReport()">📋 複製報表</button>
+      <button class="m-close" onclick="closeModal()">關閉</button>
+    </div>
+  </div>
+</div>
+<script>
+const P=[
+  {id:'A',name:'求財籤詩鳳梨杯',price:88, emoji:'🍍',note:'求財入門款',color:'#e65100',bg:'rgba(230,81,0,0.22)'},
+  {id:'B',name:'平安透心涼果茶', price:118,emoji:'🍹',note:'一路發・清涼解渴',color:'#00796b',bg:'rgba(0,121,107,0.22)'},
+  {id:'C',name:'求財水果禮盒',   price:188,emoji:'🎁',note:'一定發・帶財氣回家',color:'#b71c1c',bg:'rgba(183,28,28,0.22)'},
+  {id:'D',name:'組合優惠價',     price:288,emoji:'⭐',note:'果茶＋禮盒・省18元',color:'#6a1b9a',bg:'rgba(106,27,154,0.22)'},
+];
+function getToday(){const d=new Date(),w=['日','一','二','三','四','五','六'];return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} 週${w[d.getDay()]}`;}
+const TODAY=getToday();
+document.getElementById('today-date').textContent=TODAY;
+let sales=[];
+const sd=localStorage.getItem('gs_date');
+if(sd===TODAY){try{sales=JSON.parse(localStorage.getItem('gs_sales')||'[]');}catch(e){sales=[];}}
+else{localStorage.setItem('gs_date',TODAY);localStorage.setItem('gs_sales','[]');}
+const main=document.getElementById('main');
+P.forEach(p=>{
+  const c=document.createElement('div');c.className='pcard';c.id='pc'+p.id;
+  c.style.background=`linear-gradient(135deg,${p.bg},rgba(0,0,0,.35))`;
+  c.style.borderColor=p.color+'55';
+  c.innerHTML=`<div class="pcard-inner"><div class="pc-emoji">${p.emoji}</div><div class="pc-info"><div class="pc-name">${p.name}</div><div class="pc-note">${p.note}</div></div><div class="pc-right"><div class="pc-price">${p.price}元</div><div class="pc-badge" id="badge${p.id}" style="background:${p.color}">0</div></div></div>`;
+  c.addEventListener('click',()=>addSale(p.id));main.appendChild(c);
+});
+let toastTimer=null;
+function addSale(id){
+  const p=P.find(x=>x.id===id);
+  sales.push({id,price:p.price,ts:Date.now()});save();render();
+  const card=document.getElementById('pc'+id);card.classList.remove('popped');void card.offsetWidth;card.classList.add('popped');
+  const t=document.getElementById('last-toast');t.textContent=`✅ 記錄：${p.emoji} ${p.name} ${p.price}元`;t.style.opacity='1';
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.style.opacity='0';},2000);
+}
+function undoLast(){
+  if(!sales.length){alert('目前沒有記錄可撤銷');return;}
+  const last=sales[sales.length-1];const p=P.find(x=>x.id===last.id);
+  if(confirm(`撤銷最後一筆？\n${p.emoji} ${p.name} ${p.price}元`)){
+    sales.pop();save();render();
+    const t=document.getElementById('last-toast');t.textContent='↩ 已撤銷上一筆';t.style.opacity='1';
+    clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.style.opacity='0';},2000);
+  }
+}
+function doReset(){
+  if(!sales.length){alert('今日尚無記錄');return;}
+  if(confirm(`確定清除今日全部 ${sales.length} 筆記錄？\n此操作無法復原。`)){sales=[];save();render();}
+}
+function save(){localStorage.setItem('gs_sales',JSON.stringify(sales));localStorage.setItem('gs_date',TODAY);}
+function render(){
+  const total=sales.reduce((s,x)=>s+x.price,0);
+  document.getElementById('total-num').textContent=total.toLocaleString();
+  document.getElementById('cust-num').textContent=sales.length;
+  P.forEach(p=>{document.getElementById('badge'+p.id).textContent=sales.filter(s=>s.id===p.id).length;});
+}
+function showModal(){
+  const total=sales.reduce((s,x)=>s+x.price,0);const avg=sales.length?Math.round(total/sales.length):0;
+  let bestId=null,bestCnt=0;
+  P.forEach(p=>{const c=sales.filter(s=>s.id===p.id).length;if(c>bestCnt){bestCnt=c;bestId=p.id;}});
+  const best=bestId?P.find(p=>p.id===bestId):null;
+  document.getElementById('m-date').textContent=TODAY;
+  let rows='';
+  P.forEach(p=>{const c=sales.filter(s=>s.id===p.id).length;rows+=`<div class="m-row"><div class="m-emoji">${p.emoji}</div><div class="m-name">${p.name}</div><div class="m-detail"><div class="m-cnt">×${c}</div><div class="m-sub">NT$${(c*p.price).toLocaleString()}</div></div></div>`;});
+  document.getElementById('m-rows').innerHTML=rows;
+  document.getElementById('m-total-val').textContent='NT$'+total.toLocaleString();
+  document.getElementById('s-cust').textContent=sales.length+'位';
+  document.getElementById('s-avg').textContent='NT$'+avg;
+  document.getElementById('s-best').textContent=best?best.emoji+'×'+bestCnt:'—';
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open');}
+function overlayTap(e){if(e.target===document.getElementById('overlay'))closeModal();}
+async function copyReport(){
+  const total=sales.reduce((s,x)=>s+x.price,0);const avg=sales.length?Math.round(total/sales.length):0;
+  let lines=[`📊 車城福安宮・收攤報表`,`日期：${TODAY}`,`─────────────────`];
+  P.forEach(p=>{const c=sales.filter(s=>s.id===p.id).length;lines.push(`${p.emoji} ${p.name}　×${c}　NT$${(c*p.price).toLocaleString()}`);});
+  lines.push('─────────────────');lines.push(`✅ 總營收：NT$${total.toLocaleString()}`);lines.push(`👥 香客數：${sales.length} 位`);lines.push(`💰 平均客單：NT$${avg}`);
+  const text=lines.join('\n');let ok=false;
+  if(navigator.clipboard&&window.isSecureContext){try{await navigator.clipboard.writeText(text);ok=true;}catch(e){}}
+  if(!ok){const el=document.createElement('textarea');el.value=text;el.setAttribute('readonly','');Object.assign(el.style,{position:'fixed',left:'-9999px',top:'50%',fontSize:'16px'});document.body.appendChild(el);el.focus();el.select();try{ok=document.execCommand('copy');}catch(e){}document.body.removeChild(el);}
+  if(!ok){window.prompt('手動複製：',text);return;}
+  const btn=document.getElementById('copy-btn');btn.textContent='✅ 已複製！';btn.classList.add('done');
+  setTimeout(()=>{btn.textContent='📋 複製報表';btn.classList.remove('done');},2500);
+}
+render();
+</script>
+</body>
+</html>
