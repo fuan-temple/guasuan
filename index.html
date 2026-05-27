@@ -187,6 +187,24 @@ async function copyReport(){
   setTimeout(()=>{btn.textContent='📋 複製報表';btn.classList.remove('done');},2500);
 }
 render();
+</script><script>
+(function(){try{
+  const sz=[192,512],bg='#2a0000',em='🧮',nm='果算記帳';
+  const icons=sz.map(s=>{
+    const cv=document.createElement('canvas');cv.width=cv.height=s;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,s,s);
+    ctx.font=Math.floor(s*.58)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(em,s/2,s/2+s*.03);
+    return{src:cv.toDataURL('image/png'),sizes:s+'x'+s,type:'image/png'};
+  });
+  const link=document.createElement('link');link.rel='manifest';
+  link.href=URL.createObjectURL(new Blob([JSON.stringify({
+    name:nm,short_name:nm,start_url:'.',display:'standalone',
+    background_color:bg,theme_color:bg,icons
+  })],{type:'application/json'}));
+  document.head.appendChild(link);
+}catch(e){}})();
 </script>
 </body>
 </html>
