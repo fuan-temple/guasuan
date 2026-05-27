@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>果算 — 每日記帳</title>
 <meta name="theme-color" content="#2a0000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="果算">
+<meta name="mobile-web-app-capable" content="yes">
+<title>果算</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -22,7 +23,7 @@ body{font-family:'Noto Serif TC','Microsoft JhengHei',serif;background:linear-gr
 #cust-row{text-align:center;color:rgba(255,220,180,.6);font-size:.76em;margin-top:5px;letter-spacing:1px;}
 #last-toast{text-align:center;font-size:.78em;color:rgba(105,240,174,.8);letter-spacing:1px;margin-top:5px;min-height:18px;transition:opacity .3s;}
 #main{padding:14px 14px 110px;display:flex;flex-direction:column;gap:11px;max-width:430px;margin:0 auto;}
-.pcard{border-radius:18px;border:2px solid transparent;cursor:pointer;transition:transform .12s,box-shadow .12s;-webkit-tap-highlight-color:transparent;user-select:none;overflow:hidden;}
+.pcard{border-radius:18px;border:2px solid transparent;cursor:pointer;transition:transform .12s;-webkit-tap-highlight-color:transparent;user-select:none;overflow:hidden;}
 .pcard:active{transform:scale(.94);}
 @keyframes tap-pop{0%{transform:scale(.94)}55%{transform:scale(1.05)}100%{transform:scale(1)}}
 .pcard.popped{animation:tap-pop .32s ease forwards;}
@@ -108,13 +109,35 @@ body{font-family:'Noto Serif TC','Microsoft JhengHei',serif;background:linear-gr
   </div>
 </div>
 <script>
+(function(){
+  try{
+    const bg='#2a0000',em='🧮',nm='果算';
+    const icons=[192,512].map(s=>{
+      const cv=document.createElement('canvas');
+      cv.width=cv.height=s;
+      const ctx=cv.getContext('2d');
+      ctx.fillStyle=bg;ctx.fillRect(0,0,s,s);
+      ctx.font=Math.floor(s*.56)+'px serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(em,s/2,s/2+s*.03);
+      return{src:cv.toDataURL('image/png'),sizes:s+'x'+s,type:'image/png'};
+    });
+    const link=document.createElement('link');link.rel='manifest';
+    link.href=URL.createObjectURL(new Blob([JSON.stringify({
+      name:nm,short_name:nm,start_url:'.',display:'standalone',
+      background_color:bg,theme_color:bg,icons
+    })],{type:'application/json'}));
+    document.head.appendChild(link);
+  }catch(e){}
+})();
+
 const P=[
   {id:'A',name:'求財籤詩鳳梨杯',price:88, emoji:'🍍',note:'求財入門款',color:'#e65100',bg:'rgba(230,81,0,0.22)'},
   {id:'B',name:'平安透心涼果茶', price:118,emoji:'🍹',note:'一路發・清涼解渴',color:'#00796b',bg:'rgba(0,121,107,0.22)'},
   {id:'C',name:'求財水果禮盒',   price:188,emoji:'🎁',note:'一定發・帶財氣回家',color:'#b71c1c',bg:'rgba(183,28,28,0.22)'},
   {id:'D',name:'組合優惠價',     price:288,emoji:'⭐',note:'果茶＋禮盒・省18元',color:'#6a1b9a',bg:'rgba(106,27,154,0.22)'},
 ];
-function getToday(){const d=new Date(),w=['日','一','二','三','四','五','六'];return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} 週${w[d.getDay()]}`;}
+function getToday(){const d=new Date(),w=['日','一','二','三','四','五','六'];return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} 週${w[d.getDay()]}`;}
 const TODAY=getToday();
 document.getElementById('today-date').textContent=TODAY;
 let sales=[];
@@ -187,24 +210,6 @@ async function copyReport(){
   setTimeout(()=>{btn.textContent='📋 複製報表';btn.classList.remove('done');},2500);
 }
 render();
-</script><script>
-(function(){try{
-  const sz=[192,512],bg='#2a0000',em='🧮',nm='果算記帳';
-  const icons=sz.map(s=>{
-    const cv=document.createElement('canvas');cv.width=cv.height=s;
-    const ctx=cv.getContext('2d');
-    ctx.fillStyle=bg;ctx.fillRect(0,0,s,s);
-    ctx.font=Math.floor(s*.58)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(em,s/2,s/2+s*.03);
-    return{src:cv.toDataURL('image/png'),sizes:s+'x'+s,type:'image/png'};
-  });
-  const link=document.createElement('link');link.rel='manifest';
-  link.href=URL.createObjectURL(new Blob([JSON.stringify({
-    name:nm,short_name:nm,start_url:'.',display:'standalone',
-    background_color:bg,theme_color:bg,icons
-  })],{type:'application/json'}));
-  document.head.appendChild(link);
-}catch(e){}})();
 </script>
 </body>
 </html>
